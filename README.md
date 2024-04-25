@@ -5,20 +5,31 @@ A simple plugin for displaying marks in the sign column.
 # Usage
 
 ```lua
-vim.opt.signcolumn = 'yes:1' -- optional but recommended
+vim.opt.signcolumn = 'yes:1' -- recommended
 
 local ms = require('mark-signs')
 
--- hidden, priority, sign_hl, number_hl, line_hl, cursorline_hl,
-ms.mark_number_options ({ priority = 10, sign_hl = 'Comment' })
-ms.mark_builtin_options({ priority = 11, sign_hl = 'Comment' })
-ms.mark_lower_options  ({ priority = 12, sign_hl = 'Normal', number_hl = 'CursorLineNr' })
-ms.mark_upper_options  ({ priority = 13, sign_hl = 'Normal', number_hl = 'CursorLineNr' })
+-- hidden, priority, sign_hl, number_hl, line_hl, cursorline_hl
+ms.mark_number_options ({ hidden = true })
+ms.mark_builtin_options({ priority = 10, sign_hl = 'Comment' })
+ms.mark_lower_options  ({ priority = 11, sign_hl = 'Normal', number_hl = 'CursorLineNr' })
+ms.mark_upper_options  ({ priority = 12, sign_hl = 'Normal', number_hl = 'CursorLineNr' })
 ms.mark_options('.', { hidden = true })
 
-if MarksTimer then MarksTimer:stop() end
-MarksTimer = vim.uv.new_timer()
-MarksTimer:start(0, 400, vim.schedule_wrap(ms.update_marks))
+if MarkSignsTimer then MarkSignsTimer:stop() end
+MarkSignsTimer = vim.uv.new_timer()
+MarkSignsTimer:start(0, 400, vim.schedule_wrap(function()
+    local ok, msg = pcall(function()
+        -- don't display marks in cmdwin
+        if vim.fn.getcmdwintype() ~= '' then return end
+
+        ms.update_marks()
+    end)
+    if not ok then
+        MarkSignsTimer:stop()
+        vim.api.nvim_echo({{ 'mark-signs error: ' .. msg, 'ErrorMsg' }}, true, {})
+    end
+end))
 ```
 
 # Acknowledgements

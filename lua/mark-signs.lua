@@ -99,7 +99,7 @@ function M.update_mark(mark, extmarks_by_id)
     --return create, update
 end
 
-function M.__update_marks_unsafe(buf_id)
+function M.update_marks(buf_id)
     local buf = buf_id or vim.api.nvim_win_get_buf(0)
 
     local marks_g = vim.fn.getmarklist()
@@ -150,10 +150,6 @@ function M.__update_marks_unsafe(buf_id)
     --    'Updated: ' .. updated,
     --    'Deleted: ' .. deleted
     --)
-end
-
-function M.update_marks(buf_id)
-    return pcall(M.__update_marks_unsafe, buf_id)
 end
 
 return M
