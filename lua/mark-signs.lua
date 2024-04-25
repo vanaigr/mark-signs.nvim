@@ -14,7 +14,7 @@ function M.__mark2id(name) return name:byte(1) - 32 end
 
 function M.__compile_options(opts)
     local result = {
-        opts.hidden,
+        opts.hidden and true,
         opts.priority,
         opts.sign_hl,
         opts.number_hl,
@@ -64,8 +64,8 @@ function M.update_mark(mark, extmarks_by_id)
     local mname = mark.mark:sub(2)
     local id = M.__mark2id(mname)
 
-    local mark_opts = M.__marks[id] or {}
-    if mark_opts[1] then return end
+    local mark_opts = M.__marks[id]
+    if not mark_opts or mark_opts[1] then return end
 
     local mpos = mark.pos
     local mline = mpos[2] - 1

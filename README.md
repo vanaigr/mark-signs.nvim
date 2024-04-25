@@ -10,7 +10,7 @@ vim.opt.signcolumn = 'yes:1' -- recommended
 local ms = require('mark-signs')
 
 -- hidden, priority, sign_hl, number_hl, line_hl, cursorline_hl
-ms.mark_number_options ({ hidden = true })
+-- ms.mark_number_options ({ hidden = true })
 ms.mark_builtin_options({ priority = 10, sign_hl = 'Comment' })
 ms.mark_lower_options  ({ priority = 11, sign_hl = 'Normal', number_hl = 'CursorLineNr' })
 ms.mark_upper_options  ({ priority = 12, sign_hl = 'Normal', number_hl = 'CursorLineNr' })
