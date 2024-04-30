@@ -6,7 +6,7 @@ M.ns = vim.api.nvim_create_namespace('MarkSigns')
 M.__marks = {}
 
 function M.clear(buf_id)
-    vim.api.nvim_buf_clear_namespace(0, M.ns, 0, -1)
+    vim.api.nvim_buf_clear_namespace(buf_id, M.ns, 0, -1)
 end
 
 -- 32 is space (not a mark)
@@ -58,7 +58,7 @@ function M.mark_options(name, opts)
     M.__marks[M.__mark2id(name)] = M.__compile_options(opts)
 end
 
-function M.update_mark(mark, extmarks_by_id)
+function M.update_mark(mark, extmarks_by_id, buf_id)
     local create, update
 
     local mname = mark.mark:sub(2)
@@ -93,35 +93,37 @@ function M.update_mark(mark, extmarks_by_id)
             cursorline_hl_group = mark_opts[6],
         }
 
-        vim.api.nvim_buf_set_extmark(0, M.ns, mline, mcol, opts)
+        vim.api.nvim_buf_set_extmark(buf_id, M.ns, mline, mcol, opts)
     end
 
     --return create, update
 end
 
 function M.update_marks(buf_id)
-    local buf = buf_id or vim.api.nvim_win_get_buf(0)
+    buf_id = buf_id or vim.api.nvim_win_get_buf(0)
 
     local marks_g = vim.fn.getmarklist()
-    local marks_l = vim.fn.getmarklist(buf)
+    local marks_l = vim.fn.getmarklist(buf_id)
 
-    local extmarks = vim.api.nvim_buf_get_extmarks(0, M.ns, {0,0}, {-1,-1}, {})
+    local extmarks = vim.api.nvim_buf_get_extmarks(buf_id, M.ns, {0,0}, {-1,-1}, {})
     local extmarks_by_id = {}
     for _, ext in ipairs(extmarks) do
         extmarks_by_id[ext[1]] = ext
     end
 
+    -- Note: only updating current buffer!
+
     --local total, new, updated = 0
-    for _, mark in ipairs(marks_l) do -- only updating current buffer!
-        --[[local update, create = ]]M.update_mark(mark, extmarks_by_id)
+    for _, mark in ipairs(marks_l) do
+        --[[local update, create = ]]M.update_mark(mark, extmarks_by_id, buf_id)
         --if update then updated = updated + 1 end
         --if create then new = new + 1 end
         --total = total + 1
     end
 
     for _, mark in ipairs(marks_g) do
-        if mark.pos[1] == buf then
-            --[[local update, create = ]]M.update_mark(mark, extmarks_by_id)
+        if mark.pos[1] == buf_id then
+            --[[local update, create = ]]M.update_mark(mark, extmarks_by_id, buf_id)
             --if update then updated = updated + 1 end
             --if create then new = new + 1 end
             --total = total + 1
@@ -132,7 +134,7 @@ function M.update_marks(buf_id)
     for _, ext in ipairs(extmarks) do
         if not ext.seen then
             deleted = deleted + 1
-            vim.api.nvim_buf_del_extmark(0, M.ns, ext[1])
+            vim.api.nvim_buf_del_extmark(buf_id, M.ns, ext[1])
         end
     end
 
